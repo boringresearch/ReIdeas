@@ -1,0 +1,4 @@
+snscrape
+tabulate
+smtplib
+pandas

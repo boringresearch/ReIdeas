@@ -1,0 +1,28 @@
+name: Daily Idea Reminder
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  reminder:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Python environment
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.9"
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Run script
+      env:
+        PASSWORD: ${{ secrets.PASSWORD }}
+        FROM_EMAIL: ${{ secrets.FROM_EMAIL }}
+        TO_EMAIL: ${{ secrets.TO_EMAIL }}
+        USERNAME: ${{ secrets.USERNAME }}
+      run: python reminder.py
