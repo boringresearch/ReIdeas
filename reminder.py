@@ -10,12 +10,6 @@ import re
 import snscrape.modules.twitter as sntwitter
 import datetime
 
-CSV_FILE = "tweets.csv"
-password = os.getenv("PASSWORD")
-from_email = os.getenv("FROM_EMAIL")
-to_email = os.getenv("TO_EMAIL")
-username = os.getenv("USERNAME")
-
 def calculate_days_elapsed(date):
     today = datetime.date.today()
     date_posted = datetime.datetime.strptime(date, "%Y-%m-%d").date()
@@ -119,7 +113,13 @@ def update_and_read_csv(new_tweets):
     return data
 
 def main():
-    username = username
+
+    CSV_FILE = "tweets.csv"
+    password = os.getenv("PASSWORD")
+    from_email = os.getenv("FROM_EMAIL")
+    to_email = os.getenv("TO_EMAIL")
+    username = os.getenv("USERNAME")
+
 
     fibonacci_sequence = set()
     fibonacci_generator = infinite_fibonacci()
