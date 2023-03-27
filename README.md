@@ -2,11 +2,8 @@
 
 This is an open source script that helps you remember your forgotten ideas on Twitter. The script uses the Fibonacci Sequence forgetting curve to remind you of your past content at the perfect time, making it easy to revive old ideas or come up with new ones.
 
-## Reminder Email
 
-![image](https://user-images.githubusercontent.com/25631641/227734357-fc03fec3-021b-4529-ab9f-483fa9a62638.png)
-
-## TODO
+## Future ReIdea
 ```
 
           +--------+             +-----------------+
@@ -25,6 +22,12 @@ This is an open source script that helps you remember your forgotten ideas on Tw
           | User1  |              | User2  |
           +--------+              +--------+
 ```
+
+## Reminder Email
+
+![image](https://user-images.githubusercontent.com/25631641/227734357-fc03fec3-021b-4529-ab9f-483fa9a62638.png)
+
+
 ## Usage
 
 To use the script, you'll need to set up a GitHub Actions workflow that runs the script on a daily basis. Here's how to do it:
