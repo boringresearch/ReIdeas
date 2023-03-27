@@ -6,6 +6,25 @@ This is an open source script that helps you remember your forgotten ideas on Tw
 
 ![image](https://user-images.githubusercontent.com/25631641/227734357-fc03fec3-021b-4529-ab9f-483fa9a62638.png)
 
+## TODO
+```
+
+          +--------+             +-----------------+
+          | Twitter|             | Other Platforms |
+          +--------+             +-----------------+
+                |                       |
+                +-----------+-----------+
+                            |
+                      +-----------+
+                      |   ReIdea  |
+                      +-----------+
+                            |
+                +-----------+-----------+
+                |                       |
+          +--------+              +--------+
+          | User1  |              | User2  |
+          +--------+              +--------+
+```
 ## Usage
 
 To use the script, you'll need to set up a GitHub Actions workflow that runs the script on a daily basis. Here's how to do it:
