@@ -9,6 +9,7 @@ import pandas as pd
 import re
 import snscrape.modules.twitter as sntwitter
 import datetime
+import csv
 
 CSV_FILE = "tweets.csv"
 password = os.getenv("PASSWORD")
