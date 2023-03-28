@@ -2,7 +2,7 @@ name: Daily Idea Reminder
 
 on:
   schedule:
-    - cron: "35 * * * *"
+    - cron: "0 0 * * *"
 
 jobs:
   reminder:
