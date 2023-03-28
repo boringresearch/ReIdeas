@@ -10,6 +10,12 @@ import re
 import snscrape.modules.twitter as sntwitter
 import datetime
 
+CSV_FILE = "tweets.csv"
+password = os.getenv("PASSWORD")
+from_email = os.getenv("FROM_EMAIL")
+to_email = os.getenv("TO_EMAIL")
+username = os.getenv("USERNAME")
+
 def calculate_days_elapsed(date):
     today = datetime.date.today()
     date_posted = datetime.datetime.strptime(date, "%Y-%m-%d").date()
