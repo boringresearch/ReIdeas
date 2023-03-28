@@ -42,10 +42,7 @@ def fetch_new_tweets(username, latest_tweet_date):
     return new_tweets
 
 def send_email(subject, content):
-    from_email = from_email # Replace this with your Gmail address
-    to_email = to_email  # Replace this with the recipient's email address
-    password = password  # Replace this with your Gmail password or App Password
-
+    
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
     msg["From"] = from_email
