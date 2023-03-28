@@ -132,35 +132,34 @@ def main():
     for _ in range(30):
         fibonacci_sequence.add(next(fibonacci_generator))
 
-    while True:
-        if os.path.isfile(CSV_FILE):
-            latest_tweet_date = max([datetime.datetime.strptime(row[1], "%Y-%m-%d").date() for row in csv.reader(open(CSV_FILE, newline="", encoding="utf-8")) if row[1] != "Date of Post"])
-        else:
-            latest_tweet_date = datetime.datetime.strptime("2023-01-01", "%Y-%m-%d").date()
+    if os.path.isfile(CSV_FILE):
+        latest_tweet_date = max([datetime.datetime.strptime(row[1], "%Y-%m-%d").date() for row in csv.reader(open(CSV_FILE, newline="", encoding="utf-8")) if row[1] != "Date of Post"])
+    else:
+        latest_tweet_date = datetime.datetime.strptime("2023-01-01", "%Y-%m-%d").date()
 
-        new_tweets = fetch_new_tweets(username, latest_tweet_date)
-        data = update_and_read_csv(new_tweets)
-        print(fibonacci_sequence)
-        reminder_tweets = filter_reminder_tweets(data, fibonacci_sequence)
+    new_tweets = fetch_new_tweets(username, latest_tweet_date)
+    data = update_and_read_csv(new_tweets)
+    print(fibonacci_sequence)
+    reminder_tweets = filter_reminder_tweets(data, fibonacci_sequence)
 
-        if not reminder_tweets.empty:
-            email_content = ""
-            for _, row in reminder_tweets.iterrows():
-                tweet, date, hashtags, url = row["Tweet"], row["Date of Post"], row["Tags"], row["URL"]
-                email_content += f'<div class="post">\n'
-                email_content += f'<h3>{date}</h3>\n'
-                email_content += f'<hr>\n'
-                email_content += f'<div class="post-text">\n'
-                email_content += f'<p>{tweet}</p>\n'
-                email_content += f'<p>Tags: {hashtags}</p>\n'
-                email_content += f'</div>\n'
-                email_content += f'<div class="post-link">\n'
-                email_content += f'<p><a href="{url}">Read more</a></p>\n'
-                email_content += f'</div>\n'
-                email_content += f'</div>\n'
-                email_content += f'<br>\n'
+    if not reminder_tweets.empty:
+        email_content = ""
+        for _, row in reminder_tweets.iterrows():
+            tweet, date, hashtags, url = row["Tweet"], row["Date of Post"], row["Tags"], row["URL"]
+            email_content += f'<div class="post">\n'
+            email_content += f'<h3>{date}</h3>\n'
+            email_content += f'<hr>\n'
+            email_content += f'<div class="post-text">\n'
+            email_content += f'<p>{tweet}</p>\n'
+            email_content += f'<p>Tags: {hashtags}</p>\n'
+            email_content += f'</div>\n'
+            email_content += f'<div class="post-link">\n'
+            email_content += f'<p><a href="{url}">Read more</a></p>\n'
+            email_content += f'</div>\n'
+            email_content += f'</div>\n'
+            email_content += f'<br>\n'
 
-            send_email("Your Daily Idea Reminder is Here", email_content)
+        send_email("Your Daily Idea Reminder is Here", email_content)
 
 if __name__ == "__main__":
     main()
