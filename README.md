@@ -31,7 +31,7 @@ This is an open source script that helps you remember your forgotten ideas on Tw
 ## Usage
 
 To use the script, you'll need to set up a GitHub Actions workflow that runs the script on a daily basis. Here's how to do it:
-
+0. Enable Gmail low security login (if you want to use Gmail to send this message): https://support.google.com/accounts/answer/6010255?authuser=5
 1. Use this template this repository to your own account.
 2. **Set up the required secrets in your repository's settings:**
    - `PASSWORD`: Your Gmail password or app password.
