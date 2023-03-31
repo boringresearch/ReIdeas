@@ -26,3 +26,10 @@ jobs:
         TO_EMAIL: ${{ secrets.TO_EMAIL }}
         USERNAME: ${{ secrets.USERNAME }}
       run: python reminder.py
+
+    - name: Delete workflow run
+      uses: peter-evans/delete-workflow-runs@v2.0.0
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        workflow_id: ${{ github.workflow }}
+        retention_days: 3
