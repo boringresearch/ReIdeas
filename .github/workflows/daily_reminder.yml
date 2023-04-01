@@ -27,9 +27,7 @@ jobs:
         USERNAME: ${{ secrets.USERNAME }}
       run: python reminder.py
 
-    - name: Delete workflow run
-      uses: peter-evans/delete-workflow-runs@v2.0.0
+    - name: Remove old artifacts
+      uses: c-hive/gha-remove-artifacts@v1
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        workflow_id: ${{ github.workflow }}
-        retention_days: 3
+        age: '3 days'
