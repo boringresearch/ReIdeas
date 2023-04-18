@@ -106,13 +106,17 @@ def update_and_read_csv(new_tweets):
 
     existing_tweets = set(data["Tweet"])
 
+    new_rows = []
     for tweet, date, hashtags, url in new_tweets:
         if tweet not in existing_tweets:
             tweet = tweet.replace('\n', ' ')
             new_row = {"Tweet": tweet, "Date of Post": date.strftime("%Y-%m-%d"), "Tags": hashtags, "URL": url}
-            data = data.append(new_row, ignore_index=True)
+            new_rows.append(new_row)
 
-    data.to_csv(CSV_FILE, index=False)
+    if new_rows:
+        new_data = pd.DataFrame(new_rows)
+        data = pd.concat([data, new_data], ignore_index=True)
+        data.to_csv(CSV_FILE, index=False)
 
     return data
 
