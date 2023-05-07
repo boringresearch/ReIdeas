@@ -44,54 +44,25 @@ def filter_reminder_tweets(data, fibonacci_sequence):
 #         new_tweets.append((tweet.content, tweet.date.date(), ", ".join(hashtags), tweet.url))
 
 #     return new_tweets
+import tweepy
 
 def fetch_new_tweets(username, latest_tweet_date):
+    consumer_key = os.getenv("API_KEY")
+    consumer_secret = os.getenv("API_KEY_SECRET")
+    access_token = os.getenv("ACCESS_TOKEN")
+    access_token_secret = os.getenv("ACCESS_TOKEN_SECRET")
+
+    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+    auth.set_access_token(access_token, access_token_secret)
+
+    api = tweepy.API(auth)
+
     new_tweets = []
-    url = "https://api.twitter.com/2/users/by"
-    bearer_token = "AAAAAAAAAAAAAAAAAAAAAIVCnQEAAAAAul%2F2dZBwgGCvbGXSDznMKZs2l%2BQ%3DiR3apMYFaYOKqgelr8Ck6v48edw4q0OCXvwtz7HzaSxu2MizXq" #os.getenv("BEARER_TOKEN")
-    headers = {"Authorization": f"Bearer {bearer_token}"}
-
-    params = {
-        "usernames": username,
-        "user.fields": "created_at",
-        "expansions": "pinned_tweet_id",
-        "tweet.fields": "author_id,created_at",
-    }
-
-    response = requests.get(url, headers=headers, params=params)
-
-    if response.status_code == 200:
-        data = response.json()
-
-        for user in data["data"]:
-            user_id = user["id"]
-            user_created_at = user["created_at"]
-
-            if "pinned_tweet_id" in user:
-                tweet_id = user["pinned_tweet_id"]
-                tweet_data = None
-
-                for tweet in data["includes"]["tweets"]:
-                    if tweet["id"] == tweet_id:
-                        tweet_data = tweet
-                        break
-
-                if tweet_data:
-                    tweet_text = tweet_data["text"]
-                    tweet_created_at = datetime.datetime.strptime(
-                        tweet_data["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ"
-                    ).date()
-
-                    if tweet_created_at > latest_tweet_date:
-                        hashtags = re.findall(r"#(\w+)", tweet_text)
-                        tweet_url = f"https://twitter.com/{username}/status/{tweet_id}"
-                        new_tweets.append((tweet_text, tweet_created_at, ", ".join(hashtags), tweet_url))
-
-    else:
-        print(f"Error fetching tweets: {response.status_code}")
+    for tweet in tweepy.Cursor(api.user_timeline, screen_name=username, since_id=latest_tweet_date, tweet_mode="extended").items():
+        hashtags = re.findall(r"#(\w+)", tweet.full_text)
+        new_tweets.append((tweet.full_text, tweet.created_at.date(), ", ".join(hashtags), f"https://twitter.com/{username}/status/{tweet.id}"))
 
     return new_tweets
-
 # def fetch_new_tweets(username, latest_tweet_date):
 #     new_tweets = []
 #     url = "https://api.twitter.com/2/users/by/username/" + username

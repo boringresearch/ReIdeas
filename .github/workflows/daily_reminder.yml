@@ -27,7 +27,10 @@ jobs:
         FROM_EMAIL: ${{ secrets.FROM_EMAIL }}
         TO_EMAIL: ${{ secrets.TO_EMAIL }}
         USERNAME: ${{ secrets.USERNAME }}
-        BEARER_TOKEN: ${{ secrets.BEARER_TOKEN }}    
+        API_KEY: ${{ secrets.API_KEY }}
+        API_KEY_SECRET: ${{ secrets.API_KEY_SECRET }}
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}   
       run: python reminder.py
 
     - name: Remove old artifacts
