@@ -18,7 +18,7 @@ password = os.getenv("PASSWORD")
 from_email = os.getenv("FROM_EMAIL")
 to_email = os.getenv("TO_EMAIL")
 username = os.getenv("USERNAME")
-access_token = os.getenv("BEARER_TOKEN")
+bearer_token = os.getenv("BEARER_TOKEN")
 
 def calculate_days_elapsed(date):
     today = datetime.date.today()
@@ -48,7 +48,7 @@ def filter_reminder_tweets(data, fibonacci_sequence):
 def fetch_new_tweets(username, latest_tweet_date):
     new_tweets = []
     url = "https://api.twitter.com/2/users/by"
-    access_token = "AAAAAAAAAAAAAAAAAAAAAIVCnQEAAAAAul%2F2dZBwgGCvbGXSDznMKZs2l%2BQ%3DiR3apMYFaYOKqgelr8Ck6v48edw4q0OCXvwtz7HzaSxu2MizXq" #os.getenv("BEARER_TOKEN")
+    bearer_token = "AAAAAAAAAAAAAAAAAAAAAIVCnQEAAAAAul%2F2dZBwgGCvbGXSDznMKZs2l%2BQ%3DiR3apMYFaYOKqgelr8Ck6v48edw4q0OCXvwtz7HzaSxu2MizXq" #os.getenv("BEARER_TOKEN")
     headers = {"Authorization": f"Bearer {bearer_token}"}
 
     params = {
