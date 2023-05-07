@@ -10,12 +10,15 @@ import re
 import snscrape.modules.twitter as sntwitter
 import datetime
 import csv
+import requests
+
 
 CSV_FILE = "tweets.csv"
 password = os.getenv("PASSWORD")
 from_email = os.getenv("FROM_EMAIL")
 to_email = os.getenv("TO_EMAIL")
 username = os.getenv("USERNAME")
+BEARER_TOKEN = os.getenv("BEARER_TOKEN")
 
 def calculate_days_elapsed(date):
     today = datetime.date.today()
@@ -42,43 +45,32 @@ def filter_reminder_tweets(data, fibonacci_sequence):
 
 #     return new_tweets
 
-import requests
-import os
+def create_twitter_headers():
+    headers = {"Authorization": f"Bearer {BEARER_TOKEN}"}
+    return headers
 
 def fetch_new_tweets(username, latest_tweet_date):
-    bearer_token = os.environ.get("BEARER_TOKEN")  # Use the API key secret as the bearer token
+    new_tweets = []
+    url = "https://api.twitter.com/2/users/by/username/" + username
+    headers = create_twitter_headers()
 
-    def create_headers(bearer_token):
-        headers = {"Authorization": f"Bearer {bearer_token}"}
-        return headers
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    user_id = response.json()["data"]["id"]
 
-    def create_url(username, latest_tweet_date):
-        tweet_fields = "tweet.fields=created_at"
-        user_fields = "user.fields=username"
-        expansions = "expansions=author_id"
-        since_id = f"start_time={latest_tweet_date.isoformat()}Z"  # Convert the datetime object to the required format
+    query = f"from:{user_id} since:{latest_tweet_date.strftime('%Y-%m-%d')}"
+    tweet_fields = "attachments,author_id,context_annotations,created_at,entities,geo,id,in_reply_to_user_id,lang,possibly_sensitive,public_metrics,referenced_tweets,source,text,withheld"
+    url = f"https://api.twitter.com/2/tweets/search/recent?query={query}&tweet.fields={tweet_fields}"
 
-        url = f"https://api.twitter.com/2/users/by/username/{username}/tweets?{tweet_fields}&{user_fields}&{expansions}&{since_id}"
-        return url
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    tweets_data = response.json()["data"]
 
-    def get_tweets(url, headers):
-        response = requests.get(url, headers=headers)
-        if response.status_code != 200:
-            raise Exception(f"Request returned an error: {response.status_code} {response.text}")
-        return response.json()
+    for tweet in tweets_data:
+        hashtags = [hashtag["tag"] for hashtag in tweet["entities"]["hashtags"]] if "hashtags" in tweet["entities"] else []
+        new_tweets.append((tweet["text"], tweet["created_at"][:10], ", ".join(hashtags), f"https://twitter.com/{username}/status/{tweet['id']}"))
 
-    headers = create_headers(bearer_token)
-    url = create_url(username, latest_tweet_date)
-    response_json = get_tweets(url, headers)
-
-    # Extract tweet texts and creation dates from the response JSON
-    tweets = []
-    for tweet_data in response_json["data"]:
-        tweet_text = tweet_data["text"]
-        tweet_date = datetime.datetime.strptime(tweet_data["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ")
-        tweets.append({"text": tweet_text, "date": tweet_date})
-
-    return tweets
+    return new_tweets
 
 
 def send_email(subject, content):
