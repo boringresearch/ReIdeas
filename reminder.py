@@ -42,25 +42,45 @@ def filter_reminder_tweets(data, fibonacci_sequence):
 
 #     return new_tweets
 
-import tweepy
+import requests
+import os
+from datetime import datetime
 
 def fetch_new_tweets(username, latest_tweet_date):
-    consumer_key = os.getenv("API_KEY")
-    consumer_secret = os.getenv("API_KEY_SECRET")
-    access_token = os.getenv("ACCESS_TOKEN")
-    access_token_secret = os.getenv("ACCESS_TOKEN_SECRET")
+    bearer_token = os.environ.get("BEARER_TOKEN")  # Use the API key secret as the bearer token
 
-    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-    auth.set_access_token(access_token, access_token_secret)
+    def create_headers(bearer_token):
+        headers = {"Authorization": f"Bearer {bearer_token}"}
+        return headers
 
-    api = tweepy.API(auth)
+    def create_url(username, latest_tweet_date):
+        tweet_fields = "tweet.fields=created_at"
+        user_fields = "user.fields=username"
+        expansions = "expansions=author_id"
+        since_id = f"start_time={latest_tweet_date.isoformat()}Z"  # Convert the datetime object to the required format
 
-    new_tweets = []
-    for tweet in tweepy.Cursor(api.user_timeline, screen_name=username, since_id=latest_tweet_date, tweet_mode="extended").items():
-        hashtags = re.findall(r"#(\w+)", tweet.full_text)
-        new_tweets.append((tweet.full_text, tweet.created_at.date(), ", ".join(hashtags), f"https://twitter.com/{username}/status/{tweet.id}"))
+        url = f"https://api.twitter.com/2/users/by/username/{username}/tweets?{tweet_fields}&{user_fields}&{expansions}&{since_id}"
+        return url
 
-    return new_tweets
+    def get_tweets(url, headers):
+        response = requests.get(url, headers=headers)
+        if response.status_code != 200:
+            raise Exception(f"Request returned an error: {response.status_code} {response.text}")
+        return response.json()
+
+    headers = create_headers(bearer_token)
+    url = create_url(username, latest_tweet_date)
+    response_json = get_tweets(url, headers)
+
+    # Extract tweet texts and creation dates from the response JSON
+    tweets = []
+    for tweet_data in response_json["data"]:
+        tweet_text = tweet_data["text"]
+        tweet_date = datetime.strptime(tweet_data["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ")
+        tweets.append({"text": tweet_text, "date": tweet_date})
+
+    return tweets
+
 
 def send_email(subject, content):
     
