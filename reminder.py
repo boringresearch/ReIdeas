@@ -44,7 +44,6 @@ def filter_reminder_tweets(data, fibonacci_sequence):
 
 import requests
 import os
-from datetime import datetime
 
 def fetch_new_tweets(username, latest_tweet_date):
     bearer_token = os.environ.get("BEARER_TOKEN")  # Use the API key secret as the bearer token
@@ -76,7 +75,7 @@ def fetch_new_tweets(username, latest_tweet_date):
     tweets = []
     for tweet_data in response_json["data"]:
         tweet_text = tweet_data["text"]
-        tweet_date = datetime.strptime(tweet_data["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ")
+        tweet_date = datetime.datetime.strptime(tweet_data["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ")
         tweets.append({"text": tweet_text, "date": tweet_date})
 
     return tweets
