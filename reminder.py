@@ -32,13 +32,33 @@ def infinite_fibonacci():
 def filter_reminder_tweets(data, fibonacci_sequence):
     return data[data.apply(lambda row: calculate_days_elapsed(row["Date of Post"]) in fibonacci_sequence, axis=1)]
 
-def fetch_new_tweets(username, latest_tweet_date):
-    new_tweets = []
-    query = f"from:{username} since:{latest_tweet_date.strftime('%Y-%m-%d')}"
+# def fetch_new_tweets(username, latest_tweet_date):
+#     new_tweets = []
+#     query = f"from:{username} since:{latest_tweet_date.strftime('%Y-%m-%d')}"
 
-    for tweet in sntwitter.TwitterSearchScraper(query).get_items():
-        hashtags = re.findall(r"#(\w+)", tweet.content)
-        new_tweets.append((tweet.content, tweet.date.date(), ", ".join(hashtags), tweet.url))
+#     for tweet in sntwitter.TwitterSearchScraper(query).get_items():
+#         hashtags = re.findall(r"#(\w+)", tweet.content)
+#         new_tweets.append((tweet.content, tweet.date.date(), ", ".join(hashtags), tweet.url))
+
+#     return new_tweets
+
+import tweepy
+
+def fetch_new_tweets(username, latest_tweet_date):
+    consumer_key = os.getenv("API_KEY")
+    consumer_secret = os.getenv("API_KEY_SECRET")
+    access_token = os.getenv("ACCESS_TOKEN")
+    access_token_secret = os.getenv("ACCESS_TOKEN_SECRET")
+
+    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+    auth.set_access_token(access_token, access_token_secret)
+
+    api = tweepy.API(auth)
+
+    new_tweets = []
+    for tweet in tweepy.Cursor(api.user_timeline, screen_name=username, since_id=latest_tweet_date, tweet_mode="extended").items():
+        hashtags = re.findall(r"#(\w+)", tweet.full_text)
+        new_tweets.append((tweet.full_text, tweet.created_at.date(), ", ".join(hashtags), f"https://twitter.com/{username}/status/{tweet.id}"))
 
     return new_tweets
 
