@@ -18,7 +18,7 @@ password = os.getenv("PASSWORD")
 from_email = os.getenv("FROM_EMAIL")
 to_email = os.getenv("TO_EMAIL")
 username = os.getenv("USERNAME")
-BEARER_TOKEN = os.getenv("BEARER_TOKEN")
+access_token = os.getenv("BEARER_TOKEN")
 
 def calculate_days_elapsed(date):
     today = datetime.date.today()
@@ -51,26 +51,71 @@ def create_twitter_headers():
 
 def fetch_new_tweets(username, latest_tweet_date):
     new_tweets = []
-    url = "https://api.twitter.com/2/users/by/username/" + username
-    headers = create_twitter_headers()
+    url = "https://api.twitter.com/2/users/by"
+    headers = {"Authorization": f"Bearer {access_token}"}
+    params = {
+        "usernames": username,
+        "user.fields": "created_at",
+        "expansions": "pinned_tweet_id",
+        "tweet.fields": "author_id,created_at",
+    }
 
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-    user_id = response.json()["data"]["id"]
+    response = requests.get(url, headers=headers, params=params)
 
-    query = f"from:{user_id} since:{latest_tweet_date.strftime('%Y-%m-%d')}"
-    tweet_fields = "attachments,author_id,context_annotations,created_at,entities,geo,id,in_reply_to_user_id,lang,possibly_sensitive,public_metrics,referenced_tweets,source,text,withheld"
-    url = f"https://api.twitter.com/2/tweets/search/recent?query={query}&tweet.fields={tweet_fields}"
+    if response.status_code == 200:
+        data = response.json()
 
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-    tweets_data = response.json()["data"]
+        for user in data["data"]:
+            user_id = user["id"]
+            user_created_at = user["created_at"]
 
-    for tweet in tweets_data:
-        hashtags = [hashtag["tag"] for hashtag in tweet["entities"]["hashtags"]] if "hashtags" in tweet["entities"] else []
-        new_tweets.append((tweet["text"], tweet["created_at"][:10], ", ".join(hashtags), f"https://twitter.com/{username}/status/{tweet['id']}"))
+            if "pinned_tweet_id" in user:
+                tweet_id = user["pinned_tweet_id"]
+                tweet_data = None
+
+                for tweet in data["includes"]["tweets"]:
+                    if tweet["id"] == tweet_id:
+                        tweet_data = tweet
+                        break
+
+                if tweet_data:
+                    tweet_text = tweet_data["text"]
+                    tweet_created_at = datetime.datetime.strptime(
+                        tweet_data["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ"
+                    ).date()
+
+                    if tweet_created_at > latest_tweet_date:
+                        hashtags = re.findall(r"#(\w+)", tweet_text)
+                        tweet_url = f"https://twitter.com/{username}/status/{tweet_id}"
+                        new_tweets.append((tweet_text, tweet_created_at, ", ".join(hashtags), tweet_url))
+
+    else:
+        print(f"Error fetching tweets: {response.status_code}")
 
     return new_tweets
+
+# def fetch_new_tweets(username, latest_tweet_date):
+#     new_tweets = []
+#     url = "https://api.twitter.com/2/users/by/username/" + username
+#     headers = create_twitter_headers()
+
+#     response = requests.get(url, headers=headers)
+#     response.raise_for_status()
+#     user_id = response.json()["data"]["id"]
+
+#     query = f"from:{user_id} since:{latest_tweet_date.strftime('%Y-%m-%d')}"
+#     tweet_fields = "attachments,author_id,context_annotations,created_at,entities,geo,id,in_reply_to_user_id,lang,possibly_sensitive,public_metrics,referenced_tweets,source,text,withheld"
+#     url = f"https://api.twitter.com/2/tweets/search/recent?query={query}&tweet.fields={tweet_fields}"
+
+#     response = requests.get(url, headers=headers)
+#     response.raise_for_status()
+#     tweets_data = response.json()["data"]
+
+#     for tweet in tweets_data:
+#         hashtags = [hashtag["tag"] for hashtag in tweet["entities"]["hashtags"]] if "hashtags" in tweet["entities"] else []
+#         new_tweets.append((tweet["text"], tweet["created_at"][:10], ", ".join(hashtags), f"https://twitter.com/{username}/status/{tweet['id']}"))
+
+#     return new_tweets
 
 
 def send_email(subject, content):
