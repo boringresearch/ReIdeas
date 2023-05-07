@@ -11,6 +11,7 @@ import snscrape.modules.twitter as sntwitter
 import datetime
 import csv
 import requests
+import feedparser
 
 
 CSV_FILE = "tweets.csv"
@@ -44,25 +45,25 @@ def filter_reminder_tweets(data, fibonacci_sequence):
 #         new_tweets.append((tweet.content, tweet.date.date(), ", ".join(hashtags), tweet.url))
 
 #     return new_tweets
-import tweepy
+# import tweepy
 
-def fetch_new_tweets(username, latest_tweet_date):
-    consumer_key = os.getenv("API_KEY")
-    consumer_secret = os.getenv("API_KEY_SECRET")
-    access_token = os.getenv("ACCESS_TOKEN")
-    access_token_secret = os.getenv("ACCESS_TOKEN_SECRET")
+# def fetch_new_tweets(username, latest_tweet_date):
+#     consumer_key = os.getenv("API_KEY")
+#     consumer_secret = os.getenv("API_KEY_SECRET")
+#     access_token = os.getenv("ACCESS_TOKEN")
+#     access_token_secret = os.getenv("ACCESS_TOKEN_SECRET")
 
-    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-    auth.set_access_token(access_token, access_token_secret)
+#     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+#     auth.set_access_token(access_token, access_token_secret)
 
-    api = tweepy.API(auth)
+#     api = tweepy.API(auth)
 
-    new_tweets = []
-    for tweet in tweepy.Cursor(api.user_timeline, screen_name=username, since_id=latest_tweet_date, tweet_mode="extended").items():
-        hashtags = re.findall(r"#(\w+)", tweet.full_text)
-        new_tweets.append((tweet.full_text, tweet.created_at.date(), ", ".join(hashtags), f"https://twitter.com/{username}/status/{tweet.id}"))
+#     new_tweets = []
+#     for tweet in tweepy.Cursor(api.user_timeline, screen_name=username, since_id=latest_tweet_date, tweet_mode="extended").items():
+#         hashtags = re.findall(r"#(\w+)", tweet.full_text)
+#         new_tweets.append((tweet.full_text, tweet.created_at.date(), ", ".join(hashtags), f"https://twitter.com/{username}/status/{tweet.id}"))
 
-    return new_tweets
+#     return new_tweets
 # def fetch_new_tweets(username, latest_tweet_date):
 #     new_tweets = []
 #     url = "https://api.twitter.com/2/users/by/username/" + username
@@ -86,6 +87,23 @@ def fetch_new_tweets(username, latest_tweet_date):
 
 #     return new_tweets
 
+def fetch_new_tweets(username, latest_tweet_date):
+    rss_url = f"https://nitter.net/{username}/rss"
+    feed = feedparser.parse(rss_url)
+    new_tweets = []
+
+    for entry in feed.entries:
+        tweet_date = datetime.datetime.strptime(entry.published, "%a, %d %b %Y %H:%M:%S %z").date()
+        if tweet_date > latest_tweet_date:
+            tweet = {
+                'content': entry.title,
+                'date': tweet_date,
+                'hashtags': ", ".join(re.findall(r"#(\w+)", entry.title)),
+                'url': entry.link
+            }
+            new_tweets.append(tweet)
+
+    return new_tweets
 
 def send_email(subject, content):
     

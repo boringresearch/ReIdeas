@@ -3,3 +3,4 @@ tabulate
 pandas
 tweepy
 requests
+feedparser
