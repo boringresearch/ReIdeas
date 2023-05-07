@@ -1,3 +1,4 @@
 snscrape
 tabulate
 pandas
+tweepy
