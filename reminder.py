@@ -45,14 +45,12 @@ def filter_reminder_tweets(data, fibonacci_sequence):
 
 #     return new_tweets
 
-def create_twitter_headers():
-    headers = {"Authorization": f"Bearer {BEARER_TOKEN}"}
-    return headers
-
 def fetch_new_tweets(username, latest_tweet_date):
     new_tweets = []
     url = "https://api.twitter.com/2/users/by"
-    headers = {"Authorization": f"Bearer {access_token}"}
+    access_token = "AAAAAAAAAAAAAAAAAAAAAIVCnQEAAAAAul%2F2dZBwgGCvbGXSDznMKZs2l%2BQ%3DiR3apMYFaYOKqgelr8Ck6v48edw4q0OCXvwtz7HzaSxu2MizXq" #os.getenv("BEARER_TOKEN")
+    headers = {"Authorization": f"Bearer {bearer_token}"}
+
     params = {
         "usernames": username,
         "user.fields": "created_at",
